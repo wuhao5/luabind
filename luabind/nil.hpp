@@ -33,7 +33,7 @@ namespace luabind
    }
 
    // defined in class.cpp
-   extern LUABIND_API detail::nil_type nil;
+   extern LUABIND_API detail::nil_type nil_;
 }
 
 #endif

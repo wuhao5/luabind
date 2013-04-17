@@ -35,7 +35,7 @@
 
 namespace luabind
 {
-   LUABIND_API detail::nil_type nil;
+   LUABIND_API detail::nil_type nil_;
 }
 
 namespace luabind { namespace detail {

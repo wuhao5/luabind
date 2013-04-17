@@ -25,8 +25,8 @@
 
 extern "C"
 {
-    #include "lauxlib.h"
-    #include "lualib.h"
+    #include "lua/lauxlib.h"
+    #include "lua/lualib.h"
 }
 
 #include <luabind/open.hpp>
@@ -112,8 +112,8 @@ void report_failure(char const* err, char const* file, int line)
 	std::cerr << file << ":" << line << "\"" << err << "\"\n";
 	tests_failure = true;
 }
-
-int main()
+/*
+int mainT()
 {
 	lua_state L;
 	try
@@ -140,3 +140,4 @@ int main()
 	}
 }
 
+*/

@@ -47,7 +47,7 @@ void f() {}
 
 COUNTER_GUARD(test_class);
 
-void test_main(lua_State* L)
+extern void test_yield_main(lua_State* L)
 {
 	using namespace luabind;
 

@@ -13,11 +13,12 @@ namespace std
 
 extern "C"
 {
-	#include "lua.h"
-	#include "lauxlib.h"
+	#include "lua/lua.h"
+	#include "lua/lauxlib.h"
 }
 
 #include <luabind/luabind.hpp>
+#include <luabind/class.hpp>
 
 struct A {};
 
@@ -34,20 +35,20 @@ int f2(lua_State* L)
 }
 
 
-int main()
+//int main(int argc, char *argv[])
+void benchmark_test(lua_State* L)
 {
 	const int num_calls = 100000;
 	const int loops = 10;
 
 	using namespace luabind;
-
-	lua_State* L = lua_open();
-	open(L);
 	
-	class_<A>(L, "A")
-		.def(constructor<>());
-
-	function(L, "test1", &f1);
+    module(L)[
+              class_<A>("A")
+              .def(constructor<>()),
+              
+              def("test1", &f1)
+              ];
 
 	lua_pushstring(L, "test2");
 	lua_pushcclosure(L, &f2, 0);
@@ -55,12 +56,13 @@ int main()
 
 	std::clock_t total1 = 0;
 	std::clock_t total2 = 0;
+	std::clock_t total3 = 0;
 
 	for (int i = 0; i < loops; ++i)
 	{
 		// benchmark luabind
 		std::clock_t start1 = std::clock();
-		lua_dostring(L, "a = A()\n"
+		luaL_dostring(L, "a = A()\n"
 									"for i = 1, 100000 do\n"
 										"test1(5, 4.6, 'foo', a)\n"
 									"end");
@@ -70,27 +72,41 @@ int main()
 
 		// benchmark empty binding
 		std::clock_t start2 = std::clock();
-		lua_dostring(L, "a = A()\n"
+		luaL_dostring(L, "a = A()\n"
 									"for i = 1, 100000 do\n"
 										"test2(5, 4.6, 'foo', a)\n"
 									"end");
 
 		std::clock_t end2 = std::clock();
+
+		// benchmark empty binding
+		std::clock_t start3 = std::clock();
+		luaL_dostring(L, "a = A()\n"
+                      "function func() return 10 end\n"
+                      "for i = 1, 100000 do\n"
+                      "func(5, 4.6, 'foo', a)\n"
+                      "end");
+        
+		std::clock_t end3 = std::clock();
+
 		total1 += end1 - start1;
 		total2 += end2 - start2;
+		total3 += end3 - start3;
 	}
 
 
 	double time1 = double(total1) / (double)CLOCKS_PER_SEC;
 	double time2 = double(total2) / (double)CLOCKS_PER_SEC;
+	double time3 = double(total3) / (double)CLOCKS_PER_SEC;
 
 #ifdef LUABIND_NO_ERROR_CHECKING
 	std::cout << "without error-checking\n";
 #endif
 	std::cout << "luabind:\t" << time1 * 1000000 / num_calls / loops << " microseconds per call\n"
 		<< "empty:\t" << time2 * 1000000 / num_calls / loops << " microseconds per call\n"
+        << "lua:\t" << time3 * 1000000 / num_calls / loops << " microseconds per call\n"
 		<< "diff:\t" << ((time1 - time2) * 1000000 / num_calls / loops) << " microseconds\n\n";
 
-	lua_close(L);
+	//lua_close(L);
 }
 
